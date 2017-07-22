@@ -16,9 +16,9 @@ var Account = Dynamo.define("Account", {
 
 Dynamo.createTables(function(err) {
   if (err) {
-    console.log('Error creating DynamoDB tables: ', err);
+    console.log("Error creating DynamoDB tables: ", err);
   } else {
-    console.log('DynamoDB tables have been created!');
+    console.log("DynamoDB tables have been created!");
   }
 });
 

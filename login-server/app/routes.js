@@ -1,16 +1,16 @@
 "use strict";
 
 module.exports = function(app, passport) {
-  app.get('/', function(req, res) {
-    res.render('index.ejs', {
+  app.get("/", function(req, res) {
+    res.render("index.ejs", {
       account: req.user
     });
   });
 
-  app.get('/play', isLoggedIn, function(req, res) {
+  app.get("/play", isLoggedIn, function(req, res) {
     var token = /connect\.sid=([^\;]*)/g.exec(req.headers.cookie)[1];
 
-    res.render('play.ejs', {
+    res.render("play.ejs", {
       account: req.user,
       credentials: {
         ip: process.ip,
@@ -19,41 +19,41 @@ module.exports = function(app, passport) {
     });
   });
 
-  app.get('/profile', isLoggedIn, function(req, res) {
-    res.render('profile.ejs', {
+  app.get("/profile", isLoggedIn, function(req, res) {
+    res.render("profile.ejs", {
       account: req.user
     });
   });
 
-  app.get('/logout', function(req, res) {
+  app.get("/logout", function(req, res) {
     req.logout();
-    res.redirect('/');
+    res.redirect("/");
   });
 
-  app.get('/login', isNotLoggedIn, function(req, res) {
-    res.render('login.ejs', {
+  app.get("/login", isNotLoggedIn, function(req, res) {
+    res.render("login.ejs", {
       account: req.user
     });
   });
 
-  app.post('/login', passport.authenticate('login', {
-    successRedirect : '/profile',
-    failureRedirect : '/login'
+  app.post("/login", passport.authenticate("login", {
+    successRedirect : "/profile",
+    failureRedirect : "/login"
   }));
 
-  app.get('/signup', isNotLoggedIn, function(req, res) {
-    res.render('signup.ejs', {
+  app.get("/signup", isNotLoggedIn, function(req, res) {
+    res.render("signup.ejs", {
       account: req.user
     });
   });
 
-  app.post('/signup', passport.authenticate('signup', {
-    successRedirect : '/profile',
-    failureRedirect : '/signup'
+  app.post("/signup", passport.authenticate("signup", {
+    successRedirect : "/profile",
+    failureRedirect : "/signup"
   }));
 
   app.use(function(req, res) {
-    res.redirect('/');
+    res.redirect("/");
   });
 };
 
@@ -62,7 +62,7 @@ function isLoggedIn(req, res, next) {
     return next();
   }
 
-  res.redirect('/');
+  res.redirect("/");
 }
 
 function isNotLoggedIn(req, res, next) {
@@ -70,5 +70,5 @@ function isNotLoggedIn(req, res, next) {
     return next();
   }
 
-  res.redirect('/profile');
+  res.redirect("/profile");
 }

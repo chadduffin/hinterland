@@ -1,9 +1,13 @@
 "use strict";
 
-process.title = 'game-server';
+process.title = "game-server";
 
 var Port                    = process.env.PORT || 8081;
-var Http                    = require('http');
+var Dict                    = require("collections/dict");
+var Http                    = require("http");
+
+var Tokens                  = new Dict();
+var Clients                 = new Dict();
 
 var HttpServer = Http.createServer(function(request, response) {
   /* HTTP REQUESTS HERE */
@@ -13,38 +17,53 @@ HttpServer.listen(Port, function() {
   /* SERVER BEGINS LISTENING HERE */
 });
 
-var SocketIO                = require('socket.io')(HttpServer);
+var SocketIO                = require("socket.io")(HttpServer);
 
-var Clients                 = [];
+SocketIO.on("connection", function (socket) {
+  /* client initialization */
+  socket.on("init", function (message) {
+    var ip    = message.ip;
+    var token = message.token;
+    
+    if (typeof Clients.get(token) !== "undefined") {
+      Tokens.set(socket.id, token);
+      console.log("Reconnection.");
+      return;
+    }
 
-SocketIO.on('connection', function (socket) {
-  console.log("New connection.");
-
-  socket.on('credentials', function (message) {
-    console.log(message);
-
-    var options = { 
-        hostname: String(message.ip),
+    try {
+      var options = {
         port: 8080,
-        path: '/profile',
-        method: 'GET',
-        headers: {'Cookie': 'connect.sid='+String(message.token)}
-    };
+        hostname: ip,
+        path: "/profile",
+        method: "GET",
+        headers: {"Cookie": "connect.sid=" + String(token)}
+      }
 
-    console.log(options);
+      var request = Http.request(options, function(response) {
+        if (response.statusCode == 200) {
+          Tokens.set(socket.id, token);
+          Clients.set(token, socket.id);
+          console.log("Connection.");
+        }
+      });
 
-    var test;
+      request.end();
+    }
 
-    var req = Http.request(options, function(response) {
-      test = response.statusCode;
-    });
-
-    console.log(test);
-
-    req.end();
+    catch (error) {
+      console.log(error);
+    }
   });
 
-  socket.on('message', function (message) {
+  /* client data */
+  socket.on("data", function (message) {
     console.log(message);
+  });
+
+  /* client disconnection */
+  socket.on("disconnect", function() {
+    Tokens.delete(socket.id);
+    console.log("Disconnection.");
   });
 });
