@@ -2,68 +2,49 @@
 
 process.title = 'game-server';
 
-var webSocketsServerPort    = process.env.PORT || 32768;
-var webSocketServer         = require('websocket').server;
-var mysql                   = require('mysql');
-var http                    = require('http');
+var Port                    = process.env.PORT || 8081;
+var Http                    = require('http');
 
-var clients                 = [];
-
-var mysql = mysql.createConnection({
-  host: "",
-  port: "",
-  user: "",
-  password: "",
-  database: ""
-});
-
-var server = http.createServer(function(request, response) {
+var HttpServer = Http.createServer(function(request, response) {
   /* HTTP REQUESTS HERE */
-  var url                   = request.url;
-  var method                = request.method;
-
-  if ((method === "GET") && (url === "/clients")) {
-    response.write("empty");
-    response.end();
-  }
 });
 
-server.listen(webSocketsServerPort, function() {
+HttpServer.listen(Port, function() {
   /* SERVER BEGINS LISTENING HERE */
 });
 
-var wsServer = new webSocketServer({
-  httpServer: server
-});
+var SocketIO                = require('socket.io')(HttpServer);
 
-wsServer.on('request', function(request) {
-  console.log((new Date()) + ' Connection from origin ' + request.origin + '.');
+var Clients                 = [];
 
-  var connection            = request.accept(null, request.origin); 
-  var index                 = clients.push(connection)-1;
-  var userName              = false;
+SocketIO.on('connection', function (socket) {
+  console.log("New connection.");
 
-  console.log((new Date()) + ' Connection accepted.');
+  socket.on('credentials', function (message) {
+    console.log(message);
 
-  connection.on('message', function(message) {
-    if (message.type === 'utf8') {
-     if (userName === false) {
-        userName = message.utf8Data;
-        connection.sendUTF(JSON.stringify({type:'single', data: 'data'}));
-      } else {
-        var json = JSON.stringify({type:'broadcast', data: 'data'});
+    var options = { 
+        hostname: String(message.ip),
+        port: 8080,
+        path: '/profile',
+        method: 'GET',
+        headers: {'Cookie': 'connect.sid='+String(message.token)}
+    };
 
-        for (var i=0; i < clients.length; i++) {
-          clients[i].sendUTF(json);
-        }
-      }
-    }
+    console.log(options);
+
+    var test;
+
+    var req = Http.request(options, function(response) {
+      test = response.statusCode;
+    });
+
+    console.log(test);
+
+    req.end();
   });
 
-  connection.on('close', function(connection) {
-    if (userName !== false) {
-      console.log((new Date()) + " Peer " + connection.remoteAddress + " disconnected.");
-      clients.splice(index, 1);
-    }
+  socket.on('message', function (message) {
+    console.log(message);
   });
 });

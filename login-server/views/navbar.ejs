@@ -1,0 +1,9 @@
+<a href="/" class="btn btn-default btn-sm">Home</a>
+<% if (account) { %>
+  <a href="/play" class="btn btn-default btn-sm">Play</a>
+  <a href="/profile" class="btn btn-default btn-sm">Profile</a>
+  <a href="/logout" class="btn btn-default btn-sm">Logout</a>
+<% } else { %>
+  <a href="/login" class="btn btn-default btn-sm"><span class="fa fa-user"></span>Login</a>
+  <a href="/signup" class="btn btn-default btn-sm"><span class="fa fa-user"></span>Signup</a>
+<% } %>

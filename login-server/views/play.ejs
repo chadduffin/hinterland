@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<%- include("header.ejs"); %>
+<%- include("navbar.ejs"); %>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js">
+</script>
+<script>
+  socket = io('http://localhost:8081/');
+  
+  socket.on('connect', function() {
+    socket.emit('message', {
+      ip: "<%= credentials.ip %>",
+      token: "<%= credentials.token %>"
+    });
+  });
+</script>
+<body>
+  <div class="container">
+    <div class="page-header text-center">
+      <h1><span class="fa fa-anchor"></span>Game Page</h1>
+    </div>
+  </div>
+  <%= credentials.token %><br>
+  <canvas width="640" height="480"></canvas>
+</body>
+</html>

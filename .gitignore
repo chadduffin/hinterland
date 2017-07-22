@@ -2,4 +2,6 @@
 *.pub
 game-server/node_modules/*
 login-server/node_modules/*
+game-server/package-lock.json
+login-server/package-lock.json
 login-server/credentials.json
