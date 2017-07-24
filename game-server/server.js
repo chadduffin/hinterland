@@ -26,7 +26,12 @@ SocketIO.on("connection", function (socket) {
     var token = message.token;
     
     if (typeof Clients.get(token) !== "undefined") {
+      var value = Clients.get(token);
+      value.socket = socket.id;
+      Clients.set(token, value);
+
       Tokens.set(socket.id, token);
+
       console.log("Reconnection.");
       return;
     }
@@ -43,7 +48,10 @@ SocketIO.on("connection", function (socket) {
       var request = Http.request(options, function(response) {
         if (response.statusCode == 200) {
           Tokens.set(socket.id, token);
-          Clients.set(token, socket.id);
+          Clients.set(token, {
+            socket: socket.id,
+            lastPing: Date.now()
+          });
           console.log("Connection.");
         }
       });
@@ -67,3 +75,12 @@ SocketIO.on("connection", function (socket) {
     console.log("Disconnection.");
   });
 });
+
+setInterval(function() {
+  Clients.forEach(function(value, key) {
+    if ((Tokens.has(value.socket) == false) &&
+        (Date.now()-value.lastPing > 10000)) {
+      Clients.delete(key);
+    }
+  });
+}, (1000));
